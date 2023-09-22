@@ -8,10 +8,17 @@ import json
 import os
 
 
-class Avengers:
-    def __init__(self, top_dir="issue_summaries"):
-        self.top_dir = top_dir
+def valid_title(filename):
+    filename = filename.strip()
+    invalid = '<>:"/\|?* '
+    for char in invalid:
+        filename = filename.replace(char, '')
+    return filename
 
+
+class Avengers:
+    def __init__(self, top_dir="issue_summaries_xmen"):
+        self.top_dir = top_dir
         self.driver = self.get_driver()
         self.soup = self.open_page()
 
@@ -21,12 +28,13 @@ class Avengers:
 
         options.add_argument('--ignore-certificate-errors')
         options.add_argument('--incognito')
-        options.add_argument('--headless')
+        # options.add_argument('--headless')
         return webdriver.Firefox(options=options)
 
     def open_page(self):
 
-        URL = "https://mightyavengers.net/comics/series"
+        #URL = "https://mightyavengers.net/comics/series"
+        URL = "https://uncannyxmen.net/comics/series"
         self.driver.get(URL)
         element = self.find_link("ALL")
         # click the element
@@ -46,27 +54,24 @@ class Avengers:
         for title in titles:
             link = title.find("a")
             comic_title = link.text
-            comic_title = self.valid_title(comic_title)
-            title_dir = os.path.join("issue_summaries", comic_title)
-            if not os.path.exists(title_dir):
-                os.makedirs(title_dir, exist_ok=True)
+            comic_title = valid_title(comic_title)
+            title_dir = os.path.join(self.top_dir, comic_title)
+            os.makedirs(title_dir, exist_ok=True)
 
-                s = link.get('href').rfind("/") + 1
-                url = self.driver.current_url[:-3] + link.get('href')[s:]
+            s = link.get('href').rfind("/") + 1
+            url = self.driver.current_url[:-3] + link.get('href')[s:]
+            print()
+            print(url)
+            print("-------------------------")
+            try:
                 soup = BeautifulSoup(requests.get(url).content, "html.parser")
-
                 title = Title(soup, title_dir)
                 title.save_issues()
-
-    def valid_title(self, filename):
-        filename = filename.strip()
-        invalid = '<>:"/\|?* '
-        for char in invalid:
-            filename = filename.replace(char, '')
-        return filename
+            except Exception as e:
+                print(e)
 
 
-class Title():
+class Title:
     def __init__(self, soup, title_dir):
         self.soup = soup
         self.story_object = {}
@@ -79,10 +84,16 @@ class Title():
     def summaries(self, summary_links):
         for summary_link in summary_links:
             issue_link = summary_link.find("a")
+            try:
+                #url = "https://mightyavengers.net" + issue_link.get('href')
+                url = "https://uncannyxmen.net" + issue_link.get('href')
 
-            url = "https://mightyavengers.net" + issue_link.get('href')
-            soup = BeautifulSoup(requests.get(url).content, "html.parser")
-            self.save_issue(soup)
+                print(url)
+                soup = BeautifulSoup(requests.get(url).content, "html.parser")
+                self.save_issue(soup)
+            except Exception as e:
+                print(e)
+                raise ConnectionError(e)
 
     def save_issue(self, soup):
         self.title(soup)
@@ -91,13 +102,6 @@ class Title():
         self.characters(soup)
         self.story_notes(soup)
         self.save_json(soup)
-
-    def valid_title(self, filename):
-        filename = filename.strip()
-        invalid = '<>:"/\|?* '
-        for char in invalid:
-            filename = filename.replace(char, '')
-        return filename
 
     def title(self, soup):
         title = soup.find(class_="field-name-field-story-title")
@@ -150,14 +154,21 @@ class Title():
 
         issue_title = soup.find(id="page-title").text
 
-        issue_title = self.valid_title(issue_title)
+        issue_title = valid_title(issue_title)
         issue_path = os.path.join(self.title_dir, f"{issue_title}.json")
         with open(issue_path, "w") as f:
             json.dump(self.story_object, f)
 
-
-def main():
+def save_one(url,title_dir):
     avengers = Avengers()
+
+    url = "https://uncannyxmen.net/comics/issue/uncanny-avengers-annual-1st-series-1"
+    title_dir = "C:\\Users\\Bilbo\\Documents\\dev\\python\\marvel_universe\\data\\avengers\\issue_summaries\\UncannyAvengers(1stseries)"
+    soup = BeautifulSoup(requests.get(url).content, "html.parser")
+    title = Title(soup, title_dir)
+    title.save_issue(soup)
+def main():
+    avengers = Avengers("issue_summaries_xmen")
     avengers.get_summaries()
 
 
