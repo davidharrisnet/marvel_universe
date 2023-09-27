@@ -47,12 +47,12 @@ if __name__ == "__main__":
 
     print("cleaning text")
 
-    issue_summaries = "issue_summaries_xmen"
-    issue_json_path = issue_summaries+ '/**/*.json'
+    issue_summaries = "C:\\Temp\\issue_summaries_xmen"
+    issue_json_path = issue_summaries+ '\\**\\*.json'
     #print(os.listdir(issue_summaries))
     files = glob.glob(issue_json_path)
     for f in files:
-        clean_text(f)
+        get_text_from_json(f)
     print("done")
     '''
 
