@@ -60,7 +60,7 @@ class Avengers:
         
 
     def create_database(self):
-        dirs = [d for d in os.listdir(self.document_directory)]
+        dirs = [d for d in os.listdir(self.document_directory)]  # each summary directory
         dirs.sort()
         for index, directory in enumerate(dirs):
           
@@ -68,7 +68,7 @@ class Avengers:
           print(f"{index} {summary_directory}")
           self.load_docs(summary_directory)
           self.split_docs()
-          self.update_database()
+          self.update_database()         
 
     def load_docs(self, summary_directory):
         print("load_docs")
@@ -89,7 +89,7 @@ class Avengers:
                                  
     def update_database(self):
               
-        split_docs_chunked = self.split_list(self.texts, 41000)
+        split_docs_chunked = self.split_list(self.texts, 41000)  # the token limit
         vectordb = None
         for split_docs_chunk in split_docs_chunked:
             vectordb = Chroma.from_documents(
@@ -97,14 +97,14 @@ class Avengers:
                 embedding=self.embedding,
                 persist_directory=self.database_name)
         if vectordb:
-            vectordb.add_documents(self.documents)
-            vectordb.persist()
+            vectordb.add_documents(self.documents)  # update the database
+            vectordb.persist()                      # persist changes
 
-import os
-drive = "/home/bilbo/dev/dhnet/marvel_universe"
 
-summary_directory = os.path.join(drive, "data", "clean_fulltext_xmen/")
-database_directory = os.path.join(drive, "uncannyxmendb")
+drive = "C:\\Users\\584400\\Documents\\Dev\\python\\dhnet\\marvel_universe"
+
+summary_directory = os.path.join(drive, "data", "clean_fulltext_xmen/") # the summary files
+database_directory = os.path.join(drive, "uncannyxmendb")  # the local database
 
 
 a = Avengers(document_directory=summary_directory,database_name=database_directory)

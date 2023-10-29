@@ -42,8 +42,8 @@ class MarvelQuestions:
         return result
     
 import os
-drive = "/home/bilbo/dev/dhnet/marvel_universe"
-database_directory = os.path.join(drive, "uncannyxmendb")
+drive = "C:\\Users\\584400\\Documents\\Dev\\python\\dhnet\\marvel_universe\\data"
+database_directory = os.path.join(drive, "clean_fulltext_xmen")
 
 if __name__ == "__main__":
     mq = MarvelQuestions(database_directory)
